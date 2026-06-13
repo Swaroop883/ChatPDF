@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatPDF — Chat</title>
+  <meta name="description" content="Ask questions about your uploaded PDF using RAG or Summary mode." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+
+<div class="chat-layout">
+
+ 
+  <header class="chat-header">
+
+    
+    <div class="brand" style="font-size: 1.1rem;">
+      <div class="brand-icon" style="width:28px;height:28px;font-size:0.9rem;">✦</div>
+      ChatPDF
+    </div>
+
+    
+    <div id="chat-doc-name" class="chat-doc-name">Loading…</div>
+
+    
+    <button id="btn-close-chat" class="btn btn-danger btn-sm">
+      ✕ Close Chat
+    </button>
+
+  </header>
+
+  
+  <div id="chat-messages" class="chat-messages" aria-live="polite" aria-label="Chat messages">
+
+   
+  </div>
+
+  
+  <div class="chat-input-area">
+
+    
+    <div class="mode-selector" role="group" aria-label="Select query mode">
+
+      <span class="mode-label">Mode:</span>
+
+      
+      <button
+        id="btn-mode-rag"
+        class="btn btn-rag btn-sm"
+        title="Find answers directly stated in the PDF"
+        aria-pressed="false"
+      >
+        🔍 Search inside PDF
+      </button>
+
+      
+      <button
+        id="btn-mode-summary"
+        class="btn btn-summary btn-sm"
+        title="Ask broad analytical or synthesis questions"
+        aria-pressed="false"
+      >
+        🧠 Analytical Question
+      </button>
+
+    </div>
+
+    
+    <div
+      id="mode-indicator"
+      style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; min-height: 18px;"
+    >
+      Select a mode above before asking your question.
+    </div>
+
+    
+    <div class="chat-input-row">
+
+      
+      <textarea
+        id="chat-question"
+        class="chat-textarea"
+        placeholder="Type your question and press Enter…"
+        rows="1"
+        aria-label="Your question"
+      ></textarea>
+
+     
+      <button
+        id="btn-send"
+        class="send-btn"
+        aria-label="Send message"
+        title="Send (Enter)"
+      >
+        ➤
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/chat.js"></script>
+<script>
+  
+  initChatPage();
+</script>
+
+</body>
+</html>

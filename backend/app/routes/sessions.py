@@ -1,0 +1,101 @@
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session as DBSession
+
+from app.db.database import get_db
+from app.db import crud
+from app.core.embeddings import delete_document_vectors
+from app.routes.auth import get_current_user_id
+
+router = APIRouter()
+
+# Pydantic Schemas
+
+class CreateSessionRequest(BaseModel):
+    document_id: int
+
+# Routes
+
+@router.post("/create")
+def create_chat_session(
+    body: CreateSessionRequest,
+    db: DBSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    target_document = crud.get_document_by_id(db, body.document_id)
+
+    if not target_document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with id {body.document_id} not found.",
+        )
+
+    if target_document.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this document.",
+        )
+
+    new_session = crud.create_session(
+        db=db,
+        user_id=user_id,
+        document_id=body.document_id,
+        session_name=target_document.filename,
+    )
+
+    return {
+        "session_id": new_session.id,
+        "session_name": new_session.session_name,
+        "document_id": body.document_id,
+    }
+
+@router.get("/list")
+def list_user_sessions(
+    db: DBSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    user_sessions = crud.get_sessions_by_user(db, user_id)
+
+    return [
+        {
+            "session_id": session.id,
+            "session_name": session.session_name,
+            "document_id": session.document_id,
+            "document_filename": session.document.filename if session.document else "Unknown",
+            "created_at": session.created_at.isoformat() if session.created_at else None,
+        }
+        for session in user_sessions
+    ]
+
+@router.delete("/close/{session_id}")
+def close_chat_session(
+    session_id: int,
+    db: DBSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    target_session = crud.get_session_by_id(db, session_id)
+
+    if not target_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session with id {session_id} not found.",
+        )
+
+    if target_session.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to close this session.",
+        )
+
+    document_id_to_clean = target_session.document_id
+    delete_document_vectors(document_id_to_clean)
+
+    return {
+        "message": f"Session closed. Vector embeddings for document {document_id_to_clean} deleted.",
+        "session_id": session_id,
+    }
+
+    return {
+        "message": f"Session closed. Vector embeddings for document {document_id_to_clean} deleted.",
+        "session_id": session_id,
+    }

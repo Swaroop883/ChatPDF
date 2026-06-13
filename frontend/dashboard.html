@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatPDF — Dashboard</title>
+  <meta name="description" content="Your ChatPDF dashboard — upload PDFs and continue previous conversations." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+
+
+
+<header class="dashboard-header">
+  <div class="brand">
+    <div class="brand-icon">✦</div>
+    ChatPDF
+  </div>
+  <button id="btn-logout" class="btn btn-secondary btn-sm">
+    Sign Out
+  </button>
+</header>
+
+<main class="dashboard-main">
+
+  
+  <section class="greeting-section">
+   
+    <h1 id="greeting-name">Hello!</h1>
+    <p>Upload a PDF to start a new conversation, or continue a previous one below.</p>
+  </section>
+
+  
+  <div
+    id="upload-zone"
+    class="upload-zone"
+    role="button"
+    aria-label="Upload a PDF file"
+    tabindex="0"
+  >
+    
+    <input
+      type="file"
+      id="file-input"
+      accept=".pdf"
+      aria-label="Select PDF file"
+    />
+
+   
+    <span class="upload-icon">📂</span>
+    <h3>Drop your PDF here</h3>
+    <p style="margin-top: 8px;">or click to browse files</p>
+    <p style="margin-top: 4px; font-size: 0.8rem; color: var(--text-muted);">
+      Only PDF files are accepted
+    </p>
+  </div>
+
+  
+  <div id="progress-wrapper" style="display:none;">
+    <div class="progress-container">
+      <div id="upload-progress" class="progress-bar" style="width:0%"></div>
+    </div>
+    <p id="progress-label" class="progress-label">Uploading…</p>
+  </div>
+
+  
+  <div id="sessions-title" class="section-title" style="display:none;">
+    📋 Previous Sessions
+  </div>
+
+  
+  <div id="sessions-grid" class="sessions-grid"></div>
+
+  
+  <div id="sessions-empty" class="empty-state" style="display:none;">
+    <span class="empty-state-icon">🗂️</span>
+    <h3>No sessions yet</h3>
+    <p>Upload your first PDF above to get started!</p>
+  </div>
+
+</main>
+
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  
+  initDashboardPage();
+</script>
+
+</body>
+</html>
