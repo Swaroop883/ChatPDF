@@ -6,6 +6,19 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
+#users -> registered accounts (email/password or Google)
+#documents -> uploaded PDF files linked to users
+#sessions -> chat sessions linking a user to a document
+#chat_history -> every Q&A exchange saved for a session
+
+
+
+
+# foreign key is used to establish a relationship between two tables in a relational database. It is a column (or a set of columns) in one table that refers to the primary key of another table.
+# relationship is used to define the relationship between two tables in SQLAlchemy. It allows you to navigate between related objects in your Python code, making it easier to work with related data.
+#back_populates is used to specify the attribute on the related class that should be used to establish the bidirectional relationship. It allows us to access the related objects from both sides of the relationship.
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -19,6 +32,8 @@ class User(Base):
     documents = relationship("Document", back_populates="owner")
     sessions = relationship("Session", back_populates="owner")
 
+
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -30,6 +45,8 @@ class Document(Base):
 
     owner = relationship("User", back_populates="documents")
     sessions = relationship("Session", back_populates="document")
+
+
 
 class Session(Base):
     __tablename__ = "sessions"
@@ -43,6 +60,8 @@ class Session(Base):
     owner = relationship("User", back_populates="sessions")
     document = relationship("Document", back_populates="sessions")
     messages = relationship("ChatHistory", back_populates="session")
+
+#source_chunk holds the relevant PDF excerpt used in RAG mode.
 
 class ChatHistory(Base):
     __tablename__ = "chat_history"
