@@ -1,20 +1,16 @@
+
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 
 from app.db.database import get_db
-from app.db import crud
+from app.db.crud import session_crud, document_crud
 from app.core.embeddings import delete_document_vectors
-from app.routes.auth import get_current_user_id
+from app.helper.auth_helper import get_current_user_id
+from app.schemas.session_schemas import CreateSessionRequest
 
 router = APIRouter()
 
-# Pydantic Schemas
-
-class CreateSessionRequest(BaseModel):
-    document_id: int
-
-# Routes
 
 @router.post("/create")
 def create_chat_session(
@@ -22,7 +18,8 @@ def create_chat_session(
     db: DBSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    target_document = crud.get_document_by_id(db, body.document_id)
+   
+    target_document = document_crud.get_document_by_id(db, body.document_id)
 
     if not target_document:
         raise HTTPException(
@@ -36,7 +33,7 @@ def create_chat_session(
             detail="You do not have permission to access this document.",
         )
 
-    new_session = crud.create_session(
+    new_session = session_crud.create_session(
         db=db,
         user_id=user_id,
         document_id=body.document_id,
@@ -49,12 +46,14 @@ def create_chat_session(
         "document_id": body.document_id,
     }
 
+
 @router.get("/list")
 def list_user_sessions(
     db: DBSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    user_sessions = crud.get_sessions_by_user(db, user_id)
+    
+    user_sessions = session_crud.get_sessions_by_user(db, user_id)
 
     return [
         {
@@ -67,13 +66,15 @@ def list_user_sessions(
         for session in user_sessions
     ]
 
+
 @router.delete("/close/{session_id}")
 def close_chat_session(
     session_id: int,
     db: DBSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    target_session = crud.get_session_by_id(db, session_id)
+    
+    target_session = session_crud.get_session_by_id(db, session_id)
 
     if not target_session:
         raise HTTPException(
@@ -89,11 +90,6 @@ def close_chat_session(
 
     document_id_to_clean = target_session.document_id
     delete_document_vectors(document_id_to_clean)
-
-    return {
-        "message": f"Session closed. Vector embeddings for document {document_id_to_clean} deleted.",
-        "session_id": session_id,
-    }
 
     return {
         "message": f"Session closed. Vector embeddings for document {document_id_to_clean} deleted.",

@@ -1,25 +1,17 @@
 
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 
 from app.db.database import get_db
-from app.db import crud
+from app.db.crud import session_crud, document_crud, chat_crud
 from app.core.rag import run_rag_query
 from app.core.summariser import run_summary_query
-from app.routes.auth import get_current_user_id
+from app.helper.auth_helper import get_current_user_id
+from app.schemas.chat_schemas import ChatRequest
 
 router = APIRouter()
 
-# Pydantic Schemas
-
-class ChatRequest(BaseModel):
-    session_id: int
-    question: str
-    mode: str
-
-# Routes
 
 @router.post("/chat")
 def handle_chat_query(
@@ -27,6 +19,7 @@ def handle_chat_query(
     db: DBSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
+   
     allowed_modes = {"rag", "summary"}
     if body.mode not in allowed_modes:
         raise HTTPException(
@@ -34,7 +27,7 @@ def handle_chat_query(
             detail=f"Invalid mode '{body.mode}'. Must be one of: {allowed_modes}",
         )
 
-    target_session = crud.get_session_by_id(db, body.session_id)
+    target_session = session_crud.get_session_by_id(db, body.session_id)
 
     if not target_session:
         raise HTTPException(
@@ -48,7 +41,7 @@ def handle_chat_query(
             detail="You do not have permission to post to this session.",
         )
 
-    linked_document = crud.get_document_by_id(db, target_session.document_id)
+    linked_document = document_crud.get_document_by_id(db, target_session.document_id)
 
     if not linked_document:
         raise HTTPException(
@@ -68,7 +61,7 @@ def handle_chat_query(
             pdf_file_path=linked_document.file_path,
         )
 
-    crud.save_chat_message(
+    chat_crud.save_chat_message(
         db=db,
         session_id=body.session_id,
         question=body.question,
@@ -96,7 +89,7 @@ def get_session_history(
     user_id: int = Depends(get_current_user_id),
 ):
     
-    target_session = crud.get_session_by_id(db, session_id)
+    target_session = session_crud.get_session_by_id(db, session_id)
 
     if not target_session:
         raise HTTPException(
@@ -110,8 +103,7 @@ def get_session_history(
             detail="You do not have permission to view this session's history.",
         )
 
-    
-    all_messages = crud.get_chat_history(db, session_id)
+    all_messages = chat_crud.get_chat_history(db, session_id)
 
     return {
         "session_id": session_id,
