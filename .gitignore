@@ -1,7 +1,9 @@
-.env 
-__pycache__/ 
-*.pyc 
-desktop.ini 
-chatpdf-env/ 
-storage/uploads/ 
-storage/vectorstore/ 
+.env
+chatpdf-env/
+storage/
+__pycache__/
+*.pyc
+.DS_Store
+desktop.ini
+.vscode/
+.idea/
