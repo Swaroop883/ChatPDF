@@ -1,44 +1,37 @@
 # ChatPDF 📄
 
-Chat with any PDF using AI. Upload a document, ask questions about it, and get intelligent answers powered by Google Gemini.
+Chat with any PDF using AI. Upload a document, ask questions about it, and get answers powered by Google Gemini.
 
+## Architecture Diagram
+![alt text](image.png)
 ---
 
-## What It Does
+## Core Features
 
-- Upload any PDF and start a conversation with it
-- **Search inside PDF** — finds exact answers from the document using RAG and vector search
-- **Analytical Questions** — understands the full document context to answer broader questions
-- Saves all chat history so you can revisit previous conversations
-- JWT authentication and Google OAuth login
-
----
-
-## Architecture
-
-<img width="1488" height="960" alt="Architecture" src="https://github.com/user-attachments/assets/b39aefe3-6aad-4dfd-9f52-129996ab68d0" />
-
+- **Interactive Document Conversations** — Upload PDF files and query their contents.
+- **Query Modes:**
+  - **Search inside PDF (RAG)** — Performs semantic vector searches on document chunks using ChromaDB to answer specific questions based on the PDF context.
+  - **Analytical Question** — Understands the full document context to answer broader questions.
+- **Smart Redis Caching** — Caching summaries on a Redis database to optimize speed and cost.
+- **Secure Authentication** — JWT authentication and Google OAuth login.
+- **Saves all chat history** — Saves all chat history so you can revisit previous conversations.
 
 ---
 
 ## Tech Stack
 
-**Backend**
-- FastAPI + Python
-- LangChain for RAG pipeline
-- ChromaDB for vector storage
-- Google Gemini API for LLM and embeddings
-- PostgreSQL for data storage
-- Redis for summary caching
-- JWT + Google OAuth for authentication
-
-**Frontend**
-- Vanilla HTML, CSS, JavaScript
-
+- **Frontend:** HTML, JavaScript, Vanilla CSS
+- **Backend:** FastAPI, Python
+- **Orchestration:** LangChain
+- **LLM and Embeddings:** Google Gemini
+- **Vector Database:** ChromaDB
+- **Relational Database:** PostgreSQL (SQLAlchemy)
+- **Caching:** Redis
 
 ---
 
 ## Folder Structure
+
 ```text
 ChatPDF/
 │
@@ -46,53 +39,77 @@ ChatPDF/
 │   │
 │   ├── app/
 │   │   │
-│   │   ├── routes/
-│   │   │   ├── auth.py          # Register, login, Google OAuth endpoints
-│   │   │   ├── documents.py     # PDF upload and listing endpoints
-│   │   │   ├── sessions.py      # Chat session create, list, close endpoints
-│   │   │   └── chat.py          # Chat endpoint and history retrieval
-│   │   │
 │   │   ├── core/
-│   │   │   ├── rag.py           # Vector search and RAG answer generation
-│   │   │   ├── embeddings.py    # Gemini embedding generation
-│   │   │   └── summariser.py    # LangChain summarisation with Redis caching
+│   │   │   ├── embeddings.py    # ChromaDB collections and vector storage operations
+│   │   │   ├── rag.py           # semantic lookup and RAG prompt processing
+│   │   │   └── summariser.py    # Map-Reduce chains with Redis summary caching
 │   │   │
 │   │   ├── db/
-│   │   │   ├── database.py      # PostgreSQL connection and session setup
-│   │   │   ├── models.py        # SQLAlchemy models and Pydantic schemas
-│   │   │   └── crud.py          # Database read/write operations
+│   │   │   ├── database.py      # PostgreSQL connection and session configurations
+│   │   │   ├── models.py        # SQLAlchemy models (User, Document, Session, ChatMessage)
+│   │   │   └── crud/            # Database read/write (CRUD) operations
+│   │   │       ├── chat_crud.py      # Messages history database storage
+│   │   │       ├── document_crud.py  # Uploaded documents database management
+│   │   │       ├── session_crud.py   # Chat sessions creation and listing queries
+│   │   │       └── user_crud.py      # User authentication and registration database actions
 │   │   │
-│   │   ├── config.py            # Environment variables and model factories
-│   │   └── main.py              # FastAPI entry point and route registration
+│   │   ├── helper/
+│   │   │   ├── auth_helper.py   # JWT encoding/decoding and bcrypt password hashing
+│   │   │   └── document_helper.py # PDF text extraction and text splitting helpers
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.py          # Signup, password login, and Google OAuth 2.0 routes
+│   │   │   ├── chat.py          # Session chat queries and history endpoints
+│   │   │   ├── documents.py     # File uploading and document list endpoints
+│   │   │   └── sessions.py      # Session creation, listing, and closing endpoints
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── auth_schemas.py  # Pydantic schemas for authentication
+│   │   │   ├── chat_schemas.py  # Pydantic schemas for messaging
+│   │   │   └── session_schemas.py # Pydantic schemas for sessions
+│   │   │
+│   │   ├── config.py            # Unified application environment config
+│   │   └── main.py              # FastAPI main server entrypoint and route setups
 │   │
 │   └── requirements.txt         # Python dependencies
 │
 ├── frontend/
 │   │
-│   ├── index.html               # Login & registration page
-│   ├── dashboard.html           # PDF upload and session dashboard
-│   ├── chat.html                # Chat interface with mode selection
-│   ├── style.css                # Global dark-theme styling
+│   ├── js/
+│   │   ├── api.js               # Centralized fetch functions with JWT headers
+│   │   ├── auth.js              # Auth status checks and tab switching UI logic
+│   │   ├── chat.js              # Chat messages UI rendering, scroll sync, and indicator triggers
+│   │   ├── dashboard.js         # File drag-and-drop zones and session cards rendering
+│   │   └── utils.js             # General toasts and date/time formatting utilities
 │   │
-│   └── js/
-│       ├── api.js               # API calls and JWT handling
-│       ├── auth.js              # Authentication & Google OAuth
-│       ├── dashboard.js         # Uploads and session management
-│       ├── chat.js              # Chat interactions and messaging
-│       └── utils.js             # Shared utility functions
+│   ├── styles/
+│   │   ├── common.css           # Resets, global variables, cards, buttons, inputs, toasts, and spinners
+│   │   ├── index.css            # Styling for index/login layout and card headers
+│   │   ├── dashboard.css        # Upload boundaries, greeting sections, session grids, and badges
+│   │   └── chat.css             # Chat messaging bubbles, scrollbars, textareas, and voice/action states
+│   │
+│   ├── chat.html                # PDF Chat interface page
+│   ├── dashboard.html           # Document uploading and history dashboard
+│   └── index.html               # User entry / Auth login page
+│
+├── storage/                     # Local storage directories
+│   ├── uploads/                 # Stores uploaded PDF files
+│   └── vectorstore/             # Stores persistent ChromaDB vector indexes
 │
 └── .gitignore
 ```
 
-## Setup
+---
 
-**1. Clone the repo**
+## Setup Instructions
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/Swaroop883/ChatPDF.git
 cd ChatPDF
 ```
 
-**2. Create and activate virtual environment**
+### 2. Create and Activate Virtual Environment
 ```bash
 python -m venv chatpdf-env
 
@@ -103,65 +120,49 @@ chatpdf-env\Scripts\activate
 source chatpdf-env/bin/activate
 ```
 
-**3. Install dependencies**
+### 3. Install Backend Dependencies
 ```bash
 pip install -r backend/requirements.txt
 ```
 
-**4. Create a `.env` file in the root folder with the following content**
+### 4. Configure Local Environment
+Create a `.env` file in the root directory and configure the environment variables (API keys, Database credentials, JWT settings, Google Client OAuth IDs, and Redis URL).
 
-Get your free Gemini API key from [aistudio.google.com](https://aistudio.google.com). No model downloads needed — everything runs via API calls.
-
-```
-LLM_PROVIDER=gemini
-LLM_MODEL_NAME=gemini-1.5-flash
-LLM_API_KEY=your_gemini_api_key_here
-
-EMBEDDING_PROVIDER=gemini
-EMBEDDING_MODEL_NAME=models/embedding-001
-
-DATABASE_URL=postgresql://your_user:your_password@localhost/chatpdf
-JWT_SECRET_KEY=any_long_random_string_here
-JWT_ALGORITHM=HS256
-JWT_EXPIRY_HOURS=24
-
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-REDIS_URL=redis://localhost:6379
-```
-
-**5. Make sure PostgreSQL and Redis are running on your machine**
-
-**6. Run the backend**
+### 5. Launch Backend Server
+Ensure PostgreSQL and Redis services are running on your computer, then start the FastAPI application:
 ```bash
 cd backend
 uvicorn app.main:app --reload
 ```
 
-**7. Open the frontend**
-
-Open `frontend/index.html` in your browser or use Live Server in VS Code.
+### 6. Open Frontend
+Open `frontend/index.html` in your web browser.
 
 ---
 
-## API Endpoints
+## API Documentation
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register a new user |
-| POST | `/auth/login` | Login and receive JWT token |
-| GET | `/auth/google` | Login with Google OAuth |
-| POST | `/document/upload` | Upload and process a PDF |
-| GET | `/document/list` | List all uploaded documents |
-| POST | `/session/create` | Create a new chat session |
-| GET | `/session/list` | List all chat sessions |
-| POST | `/chat` | Send a question and get an answer |
-| GET | `/history/{session_id}` | Get full chat history for a session |
-| DELETE | `/session/close/{session_id}` | Close session and clean up vectors |
+|---|---|---|
+| **POST** | `/auth/register` | Create a new user account |
+| **POST** | `/auth/login` | Login and receive a JWT token |
+| **GET** | `/auth/google` | Login using Google OAuth |
+| **POST** | `/document/upload` | Upload and process a PDF |
+| **GET** | `/document/list` | List all uploaded documents of the user |
+| **POST** | `/session/create` | Start a chat session associated with a document |
+| **GET** | `/session/list` | List all user chat sessions |
+| **POST** | `/chat` | Submit a question (RAG or summary mode) |
+| **GET** | `/history/{session_id}` | Fetch full session conversation history |
+| **DELETE**| `/session/close/{session_id}`| Close a session and clean up its vector embeddings |
+
+---
+
+## Future Improvements
+
+1. **Voice Interactions (STT & TTS):** Use Speech-to-Text and Text-to-Speech models for voice conversation with the agent.
+2. **React Migration:** Port the frontend to React instead of Vanilla HTML/CSS/JS.
 
 ---
 
 ## Author
-
-Built by **Swaroop** 
+Built by **Swaroop**
