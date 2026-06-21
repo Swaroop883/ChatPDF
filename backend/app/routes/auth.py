@@ -35,14 +35,20 @@ def register_user(body: RegisterRequest, db: DBSession = Depends(get_db)):
 
     hashed_password = hash_password(body.password)
 
-    user_crud.create_user(
+    user = user_crud.create_user(
         db=db,
         username=body.username,
         email=body.email,
         password_hash=hashed_password,
     )
 
-    return {"message": "Account created successfully. You can now log in."}
+    jwt_token = create_jwt_token(user.id, user.email, user.username)
+    return {
+        "access_token": jwt_token,
+        "token_type": "bearer",
+        "username": user.username,
+        "user_id": user.id,
+    }
 
 
 @router.post("/login")

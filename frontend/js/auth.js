@@ -66,13 +66,12 @@ function initAuthPage() {
     btn.disabled = true;
     btn.textContent = "Creating account…";
     try {
-      await apiRequest("/auth/register", "POST", { username, email, password });
-      showToast("Account created! Please sign in.", "success");
-      loginTab.click();
-      document.getElementById("login-email").value = email;
+      const data = await apiRequest("/auth/register", "POST", { username, email, password });
+      saveAuthData(data.access_token, data.username);
+      showToast("Welcome!", "success");
+      setTimeout(() => { window.location.href = "dashboard.html"; }, 500);
     } catch (err) {
       showToast(err.message, "error");
-    } finally {
       btn.disabled = false;
       btn.textContent = "Create Account";
     }
