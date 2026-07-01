@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-
+from fastapi.staticfiles import StaticFiles
 from app.db.database import engine, Base
 from app.routes import auth, documents, sessions, chat
 from app.config import JWT_SECRET_KEY
@@ -42,6 +42,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(documents.router, prefix="/document", tags=["Documents"])
 app.include_router(sessions.router, prefix="/session", tags=["Sessions"])
 app.include_router(chat.router, tags=["Chat"])
+app.mount("/frontend", StaticFiles(directory=r"C:\development\chat-PDF\ChatPDF\frontend"), name="frontend")
 
 @app.get("/", tags=["Health"])
 def health_check():
