@@ -237,8 +237,9 @@ async function closeChat(sessionId) {
   try {
     await apiRequest(`/session/close/${sessionId}`, "DELETE");
     showToast("Chat closed.", "success");
-  } catch {
-    showToast("Chat closed.", "info");
+  } catch (err){
+    console.log(err);
+    showToast("Unable to notify server. Returning to dashboard.", "info");
   }
   sessionStorage.removeItem("chatpdf_session_id");
   sessionStorage.removeItem("chatpdf_session_name");
