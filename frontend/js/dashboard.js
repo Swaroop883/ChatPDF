@@ -1,13 +1,28 @@
 async function initDashboardPage() {
-  const token = requireAuth();
-  if (!token) return;
+  
+    
 
-  const params = new URLSearchParams(window.location.search);
-  const tokenFromUrl = params.get("token");
-  if (tokenFromUrl) {
-    saveAuthData(tokenFromUrl, params.get("username") || "User");
-    window.history.replaceState({}, document.title, "dashboard.html");
-  }
+    const params = new URLSearchParams(window.location.search);
+
+   
+    const tokenFromUrl = params.get("token");
+
+    if (tokenFromUrl) {
+
+        
+
+        saveAuthData(tokenFromUrl, params.get("username") || "User");
+
+        
+        window.history.replaceState({}, document.title, "dashboard.html");
+    }
+
+    
+
+    const token = requireAuth();
+
+    
+    if (!token) return;
 
   const greetingEl = document.getElementById("greeting-name");
   if (greetingEl) greetingEl.textContent = `Hello, ${getUsername()}!`;

@@ -1,8 +1,10 @@
 const API_BASE = "http://localhost:8000";
 
 function saveAuthData(token, username) {
-  localStorage.setItem("chatpdf_token", token);
-  localStorage.setItem("chatpdf_username", username);
+    console.log("Saving token =", token);
+
+    localStorage.setItem("chatpdf_token", token);
+    localStorage.setItem("chatpdf_username", username);
 }
 
 function getAuthToken() {
@@ -20,14 +22,25 @@ function logout() {
 }
 
 function requireAuth() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("dev") === "true") return "dev-token";
-  const token = getAuthToken();
-  if (!token) {
-    window.location.href = "index.html";
-    return null;
-  }
-  return token;
+    console.log("requireAuth called");
+
+    const params = new URLSearchParams(window.location.search);
+
+    console.log("URL =", window.location.href);
+
+    if (params.get("dev") === "true") return "dev-token";
+
+    const token = getAuthToken();
+
+    console.log("Token from localStorage =", token);
+
+    if (!token) {
+        console.log("Redirecting to index because token is null");
+        window.location.href = "index.html";
+        return null;
+    }
+
+    return token;
 }
 
 async function apiRequest(path, method = "GET", body = null) {
