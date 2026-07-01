@@ -16,7 +16,7 @@ langchain-core==0.2.9
 langchain-community==0.2.5
 
 # LLM Provider Integrations 
-langchain-google-genai==1.0.6     # Google Gemini LLM , embeddings
+langchain-groq==0.1.6             # Groq chat models
 
 #Vector Database 
 chromadb==0.5.0                   # Local vector store, no server needed

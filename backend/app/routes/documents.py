@@ -7,7 +7,7 @@ from app.db.database import get_db
 from app.db.crud import document_crud
 from app.core.embeddings import store_embeddings_for_document
 from app.helper.auth_helper import get_current_user_id
-from app.helper.document_helper import extract_text_from_pdf_file, split_text_into_chunks
+from app.helper.document_helper import extract_text_from_pdf_file, split_text_into_chunks, calculate_file_hash
 
 router = APIRouter()
 
@@ -27,9 +27,30 @@ async def upload_pdf(
         )
 
     destination_path = UPLOAD_DIR / file.filename
+    
 
     with open(destination_path, "wb") as output_file:
         shutil.copyfileobj(file.file, output_file)
+    
+    file_hash = calculate_file_hash(destination_path)
+
+    print(file_hash)
+
+    existing_document = document_crud.get_document_by_hash(
+    db,
+    file_hash,
+    )
+    if existing_document:
+
+        print("Document already exists.")
+        print("Skipping embedding generation.")
+
+        return {
+            "message": "Document already exists.",
+            "document_id": existing_document.id,
+            "filename": existing_document.filename,
+            "chunk_count": "Already Embedded",
+        }
 
     full_pdf_text = extract_text_from_pdf_file(destination_path)
 
@@ -46,6 +67,7 @@ async def upload_pdf(
         user_id=user_id,
         filename=file.filename,
         file_path=str(destination_path),
+        file_hash=file_hash,
     )
 
     store_embeddings_for_document(

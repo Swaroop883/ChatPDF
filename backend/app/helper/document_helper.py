@@ -1,5 +1,6 @@
 from pathlib import Path
 import pdfplumber
+import hashlib
 from fastapi import HTTPException, status
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -34,3 +35,20 @@ def extract_text_from_pdf_file(pdf_file_path: Path) -> str:
         )
 
     return "\n\n".join(all_pages_text)
+
+def calculate_file_hash(pdf_path: Path) -> str:
+
+    sha = hashlib.sha256()
+
+    with open(pdf_path, "rb") as f:
+
+        while True:
+
+            chunk = f.read(8192)
+
+            if not chunk:
+                break
+
+            sha.update(chunk)
+
+    return sha.hexdigest()

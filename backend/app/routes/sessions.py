@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session as DBSession
 
 from app.db.database import get_db
 from app.db.crud import session_crud, document_crud
-from app.core.embeddings import delete_document_vectors
+
 from app.helper.auth_helper import get_current_user_id
 from app.schemas.session_schemas import CreateSessionRequest
 
@@ -88,10 +88,9 @@ def close_chat_session(
             detail="You do not have permission to close this session.",
         )
 
-    document_id_to_clean = target_session.document_id
-    delete_document_vectors(document_id_to_clean)
+    
 
     return {
-        "message": f"Session closed. Vector embeddings for document {document_id_to_clean} deleted.",
+        "message": f"Chat closed successfully.",
         "session_id": session_id,
     }

@@ -41,6 +41,7 @@ class Document(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     filename = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
+    file_hash = Column(String(64), unique=True, nullable=False, index=True)
     uploaded_at = Column(DateTime, server_default=func.now())
 
     owner = relationship("User", back_populates="documents")

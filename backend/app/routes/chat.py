@@ -49,6 +49,14 @@ def handle_chat_query(
             detail="The document linked to this session could not be found.",
         )
 
+    print("\n============= CHAT REQUEST =============")
+    print("Session ID:", body.session_id)
+    print("Question:", body.question)
+    print("Requested Mode:", body.mode)
+    print("User ID:", user_id)
+    print("Linked Document ID:", linked_document.id)
+    print("========================================\n")
+
     if body.mode == "rag":
         pipeline_result = run_rag_query(
             question=body.question,
